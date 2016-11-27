@@ -108,7 +108,6 @@
                     } else {
                         accum = accum + partsArray[i];
                     }
-
                 }
             } else {
                 return false;
