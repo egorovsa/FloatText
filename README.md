@@ -35,4 +35,4 @@ $(function(){
 ```
 
 See the demo
-http://codepen.io/anon/pen/rxLeRz
+http://egorov.pw/examples/FloatText/
