@@ -1,31 +1,7 @@
 /*
  * floatText v1.2.0
- * Plugin for jquery
+ * jQuery Plagin
  * egorovsa2@gmail.com
- *
- * Floating text from block to block.
- * Creating for MediaDesc project.
- *
- * Перетекание текста из блока в блок, с сохранением минимального количества тегов
- * выделения жирности и курсива текста.
- * Для инициализации необходимо создать нужное количество блоков со своими размерами.
- * размеры у блоков должны быть указаны обязательно.
- *
- * Example:
- *
- * <!-- HTML -->
- * <div class="classForInit familyName">Put text here</div>
- * <div class="familyName"></div>
- * <div class="familyName"></div>
- * <div class="familyName"></div>
- * <div class="familyName"></div>
- *
- * //Javascript
- * $(function(){
- $('.classForInit').floatText({
- familyClassName: '.familyName'
- });
- });
  */
 (function ($) {
     var methods = {
