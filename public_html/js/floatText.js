@@ -1,5 +1,5 @@
 /*
- * floatText v1.1.0
+ * floatText v1.2.0
  * Plugin for jquery
  * egorovsa2@gmail.com
  *
@@ -29,16 +29,15 @@
  */
 (function ($) {
     var methods = {
-        //init of  application
         init: function (options) {
             var $this = this;
-            //Set a default settings
+
             var settings = jQuery.extend({
                 familyClassName: '.familyBlocks'
             }, options);
-            // geting text from first block
+
             var text = $this.parent().find(settings.familyClassName + ':first').html();
-            // run calculation
+
             methods.calculateFloat.call(jQuery(settings.familyClassName), text);
         },
         calculateFloat: function (text, callbackFunction) {
@@ -48,11 +47,11 @@
             var currentSplit = 0;
             var freeArea = false;
             var accum = '';
-            var accumNum = '';
             var blockCount = $this.length;
+            var wordLastParts = '';
 
             $this.each(function (k) {
-                var $tb = jQuery(this);
+                var $tb = $(this);
                 $tb.empty();
                 var parentHeight = $tb.height();
                 var checkHeight = parentHeight + 3;
@@ -61,30 +60,42 @@
 
                 freeArea = true;
                 accum = methods.appendOpenTags(tags, true);
-                accumNum = accum;
-
+                
+                if (wordLastParts) {
+                    accum += wordLastParts + ' ';
+                    wordLastParts = '';
+                }
+                
                 for (var i = currentSplit; i < split.length; i++) {
                     var word = split[i];
 
                     if (word) {
-                        accum += word + ' ';
-
-                        $tb.html(accum);
+                        $tb.html(accum + word + '');
 
                         //If not overflow
                         var curH = $tb.height();
 
                         if (curH <= checkHeight) {
                             methods.checkTags(tags, word);
-                            accumNum += word + ' ';
+                            accum += word + ' ';
                         }
 
                         //If  overflow
                         if (curH > checkHeight) {
-                            if ((k + 1) !== blockCount) {
-                                accumNum += methods.appendCloseTags(tags);
-                                $tb.html(accumNum);
+                            var checkHyphenResult = methods.checkForHyphen(word, accum, $tb, checkHeight);
+
+                            if (checkHyphenResult) {
+                                accum = checkHyphenResult.accum;
+                                wordLastParts = checkHyphenResult.lastParts;
+                                currentSplit = i + 1;
+                            } else {
                                 currentSplit = i;
+                            }
+
+                            accum += methods.appendCloseTags(tags);
+                            $tb.html(accum);
+
+                            if ((k + 1) !== blockCount) {
                                 freeArea = false;
 
                                 break;
@@ -106,21 +117,36 @@
                 callbackFunction();
             }
         },
-        /*
-         * function check overflow text in the last block
-         * if overflow, set to block class "overflowText"
-         *
-         * фукнция  сверяет количество блоков всего и текущее количество при расчете
-         * и если расчетное количество получилось  больше, значит текст не влез
-         * в текущее количество...
-         *
-         *
-         * methods.checkOverflowText.call($this, k + 1, blockCount);
-         * $this objectjquery - family blocks
-         * @counter int  - current calc count
-         * count - count family blocks
-         * return @;
-         */
+        checkForHyphen: function (word, accum, currentBlock, checkHeight) {
+            var partsArray = word.split(/\u00AD/g);
+
+            if (partsArray.length > 1) {
+                for (var i = 0; i < partsArray.length; i++) {
+                    currentBlock.html(accum + partsArray[i] + '-');
+
+                    if (currentBlock.height() > checkHeight) {
+                        return {
+                            accum: accum + '-',
+                            lastParts: methods.getLastParstOfWord(partsArray, i)
+                        };
+                    } else {
+                        accum = accum + partsArray[i];
+                    }
+
+                }
+            } else {
+                return false;
+            }
+        },
+        getLastParstOfWord: function (partsArray, beginIndex) {
+            var concatParts = '';
+
+            for (var i = beginIndex; i < partsArray.length; i++) {
+                concatParts += partsArray[i] + (i + 1 === partsArray.length ? '' : '&shy;');
+            }
+
+            return concatParts;
+        },
         checkOverflowText: function (counter, count) {
             var $this = this;
 
@@ -128,7 +154,6 @@
                 $this.addClass('overflowText');
             }
         },
-        /*  Check tags in word */
         checkTags: function (tags, word) {
             var resultOpen = word.match(/<[^\/].*?>/g);
             var resultClose = word.match(/<\/[^>]/g);
@@ -141,8 +166,6 @@
                 tags.pop();
             }
         },
-        // return open tag, for add to block
-        // Вернет открывающий тег, для добавления в блок
         appendOpenTags: function (tags) {
             var tagsString = '';
 
@@ -157,7 +180,7 @@
         appendCloseTags: function (tags) {
             var tagsString = '';
             tags.map(function (tag) {
-                tag = tag.match(/<[\w\-]+/)[0] + '>';                
+                tag = tag.match(/<[\w\-]+/)[0] + '>';
                 tag = tag.replace('<', '</');
                 tagsString = tag + tagsString;
             });
@@ -166,7 +189,6 @@
         }
     };
 
-    //Init of jquery plugin
     $.fn.floatText = function (method) {
         if (methods[method]) {
             return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
