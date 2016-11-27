@@ -1,5 +1,7 @@
-# floatText
-jQuery Plugin for floating text in blocks
+# FloatText v 1.2.0
+jQuery Plugin for spliting big text to several blocks
+
+- v1.2.0 Append hyphen support. 
 
  * Example:
 
