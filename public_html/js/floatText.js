@@ -102,7 +102,7 @@
 
                     if (currentBlock.height() > checkHeight) {
                         return {
-                            accum: accum + '-',
+                            accum: accum + (i > 0 ? '-' : ''),
                             lastParts: methods.getLastParstOfWord(partsArray, i)
                         };
                     } else {
